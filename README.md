@@ -103,3 +103,9 @@ ia/
 ├── config.py
 └── requirements.txt
 ```
+## TODO
+utilisation d'une constante pour definir le fichier bondecommande
+Supprimer la fonctionalité "ajout de nouveaux produits" qui est inutile finalement
+Ajouter la fonctionalité "envoyer le bon de commande généré par mail" à la pharmacienne
+Adapter l'app dans une version mobile
+Rajouter la fonctionalité "Calendrier des livraisons"
