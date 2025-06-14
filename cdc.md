@@ -19,7 +19,8 @@ Tuyeau extentions
 Y
 Seringues 20 ml
 Seringues 10 ml
-La plus grosse partie des produits est stocker dans un box, la deuxième partie est stocké à l'appartement.
+La plus grosse partie des produits est stockée dans un box, la deuxième partie est stockée dans l'appartement.
 On doit pouvoir faire la somme et le total des produits.
 On doit pouvoir remettre les stocks à zero
+On doit pouvoir injecter la quantité des produits dans le fichier word de la pharmacienne
 
