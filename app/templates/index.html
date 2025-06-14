@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <!-- Formulaire d'ajout -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Ajouter un Produit
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="productForm" method="POST" action="{{ url_for('main.add_product') }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nom du produit</label>
+                            <select class="form-select" id="name" name="name" required>
+                                <option value="">Choisir un produit...</option>
+                                {% for product in available_products %}
+                                <option value="{{ product }}">{{ product }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantité</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" required min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Emplacement</label>
+                            <select class="form-select" id="location" name="location" required>
+                                <option value="box">Box</option>
+                                <option value="apartment">Appartement</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-plus me-2"></i>Ajouter
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Totaux des produits -->
+        <div class="col-md-8 mb-4">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Totaux par Produit
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Produit</th>
+                                    <th class="text-center">Box</th>
+                                    <th class="text-center">Appartement</th>
+                                    <th class="text-center">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for name, totals in product_totals.items() %}
+                                <tr>
+                                    <td>{{ name }}</td>
+                                    <td class="text-center">{{ totals.box }}</td>
+                                    <td class="text-center">{{ totals.apartment }}</td>
+                                    <td class="text-center fw-bold">{{ totals.total }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ url_for('main.export_csv') }}" class="btn btn-success">
+                            <i class="fas fa-file-csv me-2"></i>Exporter CSV
+                        </a>
+                        <a href="{{ url_for('main.generate_order') }}" class="btn btn-primary ms-2">
+                            <i class="fas fa-file-word me-2"></i>Générer Bon de Commande
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventaire détaillé -->
+    <div class="card border-info mb-4">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-boxes me-2"></i>Inventaire Détaillé
+            </h5>
+            <div class="btn-group">
+                <button class="btn btn-light btn-sm" onclick="filterByLocation('all')">Tout</button>
+                <button class="btn btn-light btn-sm" onclick="filterByLocation('box')">Box</button>
+                <button class="btn btn-light btn-sm" onclick="filterByLocation('apartment')">Appartement</button>
+                <a href="{{ url_for('main.view_history') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-history me-1"></i>Historique
+                </a>
+                <form method="POST" action="{{ url_for('main.reset_inventory') }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir remettre tout l\'inventaire à zéro ?');">
+                    <button type="submit" class="btn btn-light btn-sm">
+                        <i class="fas fa-redo-alt me-1"></i>Réinitialiser
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="inventoryTable" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th class="text-center">Quantité</th>
+                            <th class="text-center">Emplacement</th>
+                            <th class="text-center">Dernière modification</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr data-id="{{ product.id }}" data-name="{{ product.name }}" data-location="{{ product.location }}">
+                            <td>{{ product.name }}</td>
+                            <td class="text-center">{{ product.quantity }}</td>
+                            <td class="text-center">
+                                <span class="location-badge location-{{ product.location }}">
+                                    {{ product.location|title }}
+                                </span>
+                            </td>
+                            <td class="text-center">{{ product.last_modified.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary" onclick="editProduct({{ product.id }})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteProduct({{ product.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'édition -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier le produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editProductId">
+                <input type="hidden" id="editName">
+                <div class="mb-3">
+                    <label for="editQuantity" class="form-label">Quantité</label>
+                    <input type="number" class="form-control" id="editQuantity" min="0" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editLocation" class="form-label">Emplacement</label>
+                    <select class="form-select" id="editLocation" required>
+                        <option value="box">Box</option>
+                        <option value="apartment">Appartement</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveEdit()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let editModal;
+
+document.addEventListener('DOMContentLoaded', function() {
+    editModal = new bootstrap.Modal(document.getElementById('editModal'));
+});
+
+function filterByLocation(location) {
+    const rows = document.querySelectorAll('#inventoryTable tbody tr');
+    rows.forEach(row => {
+        if (location === 'all' || row.dataset.location === location) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function editProduct(id) {
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    document.getElementById('editProductId').value = id;
+    document.getElementById('editName').value = row.dataset.name;
+    document.getElementById('editQuantity').value = row.querySelector('td:nth-child(2)').textContent;
+    document.getElementById('editLocation').value = row.dataset.location;
+    editModal.show();
+}
+
+function saveEdit() {
+    const id = document.getElementById('editProductId').value;
+    const quantity = parseInt(document.getElementById('editQuantity').value);
+    const location = document.getElementById('editLocation').value;
+
+    fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            quantity: quantity,
+            location: location
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            const quantityCell = row.querySelector('td:nth-child(2)');
+            const locationCell = row.querySelector('td:nth-child(3) span');
+            const lastModifiedCell = row.querySelector('td:nth-child(4)');
+            
+            quantityCell.textContent = data.product.quantity;
+            locationCell.textContent = data.product.location.charAt(0).toUpperCase() + data.product.location.slice(1);
+            locationCell.className = `location-badge location-${data.product.location}`;
+            lastModifiedCell.textContent = data.product.last_modified;
+            
+            row.dataset.location = data.product.location;
+            
+            editModal.hide();
+            window.location.reload();
+        } else {
+            alert('Erreur lors de la modification du produit: ' + (data.error || 'Erreur inconnue'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erreur lors de la modification du produit');
+    });
+}
+
+function deleteProduct(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+        fetch(`/api/products/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.status === 204) {
+                window.location.reload();
+            } else {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Erreur lors de la suppression');
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erreur lors de la suppression du produit: ' + error.message);
+        });
+    }
+}
+</script>
+
+{% endblock %}

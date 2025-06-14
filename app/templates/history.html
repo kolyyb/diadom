@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Historique des modifications{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Historique des modifications</h5>
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">Retour à l'inventaire</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Produit</th>
+                                <th>Action</th>
+                                <th>Ancienne quantité</th>
+                                <th>Nouvelle quantité</th>
+                                <th>Ancien emplacement</th>
+                                <th>Nouvel emplacement</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history %}
+                            <tr>
+                                <td>{{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>{{ entry.product.name }}</td>
+                                <td>
+                                    {% if entry.action == 'create' %}
+                                        <span class="badge bg-success">Création</span>
+                                    {% elif entry.action == 'update' %}
+                                        <span class="badge bg-primary">Modification</span>
+                                    {% elif entry.action == 'delete' %}
+                                        <span class="badge bg-danger">Suppression</span>
+                                    {% elif entry.action == 'reset' %}
+                                        <span class="badge bg-warning">Remise à zéro</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ entry.old_quantity if entry.old_quantity is not none else '-' }}</td>
+                                <td>{{ entry.new_quantity if entry.new_quantity is not none else '-' }}</td>
+                                <td>{{ entry.old_location|title if entry.old_location else '-' }}</td>
+                                <td>{{ entry.new_location|title if entry.new_location else '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

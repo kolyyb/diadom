@@ -1,0 +1,235 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion d'Inventaire</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .stats {
+            background-color: #e9f7ef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            text-align: center;
+            padding: 10px;
+            min-width: 150px;
+            background-color: white;
+            border-radius: 5px;
+            margin: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-box h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .stat-box p {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #27ae60;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        form {
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .btn-danger {
+            background-color: #f44336;
+        }
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        .btn-warning {
+            background-color: #ff9800;
+        }
+        .btn-warning:hover {
+            background-color: #fb8c00;
+        }
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        .action-form {
+            display: inline;
+        }
+        .form-inline {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .new-product {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gestion d'Inventaire</h1>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Total Box</h3>
+                <p id="total-box">0</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Appartement</h3>
+                <p id="total-appartement">0</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Général</h3>
+                <p id="total-general">0</p>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="new-product">
+                <h3>Ajouter un nouveau produit</h3>
+                <form action="/ajouter" method="post" class="form-inline">
+                    <input type="text" name="nom" placeholder="Nom du produit" required>
+                    <button type="submit">Ajouter</button>
+                </form>
+            </div>
+            
+            <div class="reset-stocks">
+                <h3>Réinitialiser les stocks</h3>
+                <form action="/reset" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir remettre tous les stocks à zéro?')">
+                    <button type="submit" class="btn-warning">Remettre tous les stocks à zéro</button>
+                </form>
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Stock Box</th>
+                    <th>Stock Appartement</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produit in produits %}
+                <tr>
+                    <td>{{ produit.nom }}</td>
+                    <td>{{ produit.quantite_box }}</td>
+                    <td>{{ produit.quantite_appartement }}</td>
+                    <td>{{ produit.quantite_box + produit.quantite_appartement }}</td>
+                    <td class="actions">
+                        <button onclick="toggleEditForm('{{ produit.id }}')">Modifier</button>
+                        <form action="/supprimer/{{ produit.id }}" method="post" class="action-form" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit?')">
+                            <button type="submit" class="btn-danger">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr id="edit-form-{{ produit.id }}" style="display: none;">
+                    <td colspan="5">
+                        <form action="/modifier" method="post" class="form-inline">
+                            <input type="hidden" name="id" value="{{ produit.id }}">
+                            <label>Stock Box: 
+                                <input type="number" name="quantite_box" value="{{ produit.quantite_box }}" min="0">
+                            </label>
+                            <label>Stock Appartement: 
+                                <input type="number" name="quantite_appartement" value="{{ produit.quantite_appartement }}" min="0">
+                            </label>
+                            <button type="submit">Enregistrer</button>
+                            <button type="button" onclick="toggleEditForm('{{ produit.id }}')">Annuler</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        // Fonction pour afficher/masquer le formulaire d'édition
+        function toggleEditForm(id) {
+            const form = document.getElementById(`edit-form-${id}`);
+            if (form.style.display === 'none') {
+                form.style.display = 'table-row';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+        
+        // Fonction pour charger les statistiques
+        function loadStats() {
+            fetch('/statistiques')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-box').textContent = data.total_box;
+                    document.getElementById('total-appartement').textContent = data.total_appartement;
+                    document.getElementById('total-general').textContent = data.total_general;
+                });
+        }
+        
+        // Charger les statistiques au chargement de la page
+        window.onload = loadStats;
+    </script>
+</body>
+</html>
