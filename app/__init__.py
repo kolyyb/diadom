@@ -1,12 +1,12 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_bootstrap import Bootstrap5
+from flask_bootstrap import Bootstrap
 from config import Config
 
 db = SQLAlchemy()
 migrate = Migrate()
-bootstrap = Bootstrap5()
+bootstrap = Bootstrap()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
