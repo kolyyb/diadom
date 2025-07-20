@@ -12,6 +12,16 @@ Application web Python permettant de gérer l'inventaire de matériel médical a
 - Historique des modifications
 - Remise à zéro des stocks
 
+### Vue de l'inventaire détaillé
+![alt inventaire](./assets/img/inventaire.png?raw=true)
+
+### Vue d'une insertion de quantité
+![alt Insertion formulaire](./assets/img/inser.png?raw=true)
+
+### Vue du total des quantités des produits
+![alt Totaux produits](./assets/img/totaux.png?raw=true)
+
+
 ## Installation
 
 1. Cloner le dépôt :
