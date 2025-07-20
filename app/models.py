@@ -29,7 +29,7 @@ PRODUCT_NAME_MAPPING = {
     'Dialyseurs': ['DIALYSEUR FX60 (1/RA)'],
     'Dialysats': ['PHYSIDIA DIALYSAT K1 5L/poche (5 poches/RA)'],
     'Sodium': ['SODIUM CHL.0.9% emoluer 2 litres (1/RA)'],
-    'Aiguilles à fistules': ['AIG.PLUME V16G-R20-R (Fresenius) (2/RA)'],
+    'Aiguilles à fistules': ['AIG.PLUME V16G-R20-R (Fresenius F00012286) (2/RA)'],
     'Rallonges aiguilles': ['RACCORD FISTULE LG200 (Hémodia) ( 2/RA)'],
     'Kits de ponctions': ['SET DIALYSE FISTULE medium 7/8 (1/RA)'],
     'Tuyau extentions': ['PHYSIDIA LIGNE EXTENSION 3m (2/RA)'],
