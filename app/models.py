@@ -39,6 +39,7 @@ PRODUCT_NAME_MAPPING = {
     'Seringues 10 ml': ['SERINGUE 10ML', 'SERINGUE 10', 'SERINGUES 10']
 }
 
+""" Product et ProductHistory models pour la gestion des produits et de leur historique."""
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
