@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  # 1. Analyse statique (Linting & Sécurité) - Exécuté en parallèle des tests
+  # 1. Analyse statique (Linting & Sécurité) - Exécuté en parallèle des tests 
   quality:
     runs-on: ubuntu-latest
     steps:
