@@ -1,23 +1,76 @@
-name: Pylint
+name: Python Quality & CI
 
-on: [push]
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build:
+  # 1. Analyse statique (Linting & Sécurité) - Exécuté en parallèle des tests
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Linting Tools
+        run: |
+          pip install ruff mypy bandit
+
+      - name: Run Ruff (Lint & Formatting)
+        run: ruff check . && ruff format --check .
+
+      - name: Run Mypy (Type Checking)
+        run: mypy . --ignore-missing-imports
+
+      - name: Run Bandit (Security Scan)
+        run: bandit -r . -x ./tests
+
+  # 2. Tests unitaires avec Matrice de versions
+  tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.10", "3.11", "3.12"]
+    
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-    - name: Analysing the code with pylint
-      run: |
-        pylint $(git ls-files '*.py')
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip' # Cache les dépendances pour accélérer les futurs runs
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run Tests with Pytest
+        run: |
+          pytest --cov=app --cov-report=xml tests/
+
+  # 3. Build de l'application (s'exécute seulement si la qualité et les tests passent)
+  build:
+    needs: [quality, tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Wheel and Sdist
+        run: |
+          pip install build
+          python -m build
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-package
+          path: dist/
