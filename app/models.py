@@ -26,7 +26,7 @@ PRODUCT_NAME_MAPPING = {
     'Lignes à sang': ['PHYSIDIA LIGNES A SANG A-V PHYSILINE (1/RA)'],
     'K7 Ergo Flow': ['PHYSIDIA CASSETTE dialysat PHYSI.FLOW. ERGO (1 pour 2 RA soit 3/semaine)'],
     'K7 FLOW': ['PHYSIDIA CASSETTE dialysat PHYSI.FLOW : avoir toujours 5 unités en stock'],
-    'Dialyseurs': ['DIALYSEUR FX60 (1/RA)'],
+    'Dialyseurs': ['DIALYSEUR FX80 (1/RA)'],
     'Dialysats': ['PHYSIDIA DIALYSAT K1 5L/poche (5 poches/RA)'],
     'Sodium': ['SODIUM CHL.0.9% emoluer 2 litres (1/RA)'],
     'Aiguilles à fistules': ['AIG.PLUME V16G-R20-R (Fresenius F00012286) (2/RA)'],
